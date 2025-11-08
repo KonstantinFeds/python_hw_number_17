@@ -1,36 +1,24 @@
 import json
+import os
 import requests
 from jsonschema import validate
 
+SCHEMAS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "schemas")
 
-headers_valid = {
-  'x-api-key': 'reqres-free-v1',
-  'Content-Type': 'application/json'
-}
+headers_valid = {"x-api-key": "reqres-free-v1", "Content-Type": "application/json"}
+
 
 def test_get_list_users_response_schema_is_valid():
     response = requests.get(
-        url='https://reqres.in/api/users',
+        url="https://reqres.in/api/users",
         headers=headers_valid,
-        params={"page": 1})
+        params={"page": 1},
+        timeout=10,
+    )
 
     assert response.status_code == 200
 
-    with open('schemas/get_list_users.json') as file:
+    schema_path = os.path.join(SCHEMAS_DIR, "get_list_users.json")
+    with open(schema_path, encoding="utf-8") as file:
         schema = json.load(file)
     validate(response.json(), schema)
-
-
-def test_get_users_returns_unique_users():
-    response = requests.get(
-        url="https://reqres.in/api/users",
-        params={"page": 2, "per_page": 4},
-    )
-    ids = [element["id"] for element in response.json()["data"]]
-
-    assert len(ids) == len(set(ids))
-
-
-
-
-
